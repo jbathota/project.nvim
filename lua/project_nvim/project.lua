@@ -169,28 +169,33 @@ function M.attach_to_lsp()
   M.attached_lsp = true
 end
 
-function M.set_pwd(dir, method)
-  if dir ~= nil then
-    M.last_project = dir
-    table.insert(history.session_projects, dir)
+function M.set_pwd(root_dir, method, current_dir)
+  if root_dir ~= nil then
+    M.last_project = root_dir
+    table.insert(history.session_projects, root_dir)
 
-    if vim.fn.getcwd() ~= dir then
+    if vim.fn.getcwd() ~= root_dir then
       local scope_chdir = config.options.scope_chdir
       if scope_chdir == 'global' then
-        vim.api.nvim_set_current_dir(dir)
+        vim.api.nvim_set_current_dir(root_dir)
       elseif scope_chdir == 'tab' then
-        vim.cmd('tcd ' .. dir)
+        vim.cmd('tcd ' .. root_dir)
       elseif scope_chdir == 'win' then
-        vim.cmd('lcd ' .. dir)
+        vim.cmd('lcd ' .. root_dir)
       else
         return
       end
 
       if config.options.silent_chdir == false then
-        vim.notify("Set CWD to " .. dir .. " using " .. method)
+        vim.notify("Set ROOT_CWD to " .. root_dir .. " using " .. method)
       end
     end
     return true
+  elseif current_dir ~= nil then
+    vim.cmd('lcd ' .. current_dir)
+    if config.options.silent_chdir == false then
+        vim.notify("Set CWD to " .. current_dir)
+    end
   end
 
   return false
@@ -246,7 +251,7 @@ function M.on_buf_enter()
   end
 
   local root, method = M.get_project_root()
-  M.set_pwd(root, method)
+  M.set_pwd(root, method, current_dir)
 end
 
 function M.add_project_manually()

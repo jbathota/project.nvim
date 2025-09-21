@@ -40,6 +40,9 @@ M.defaults = {
   -- Path where project.nvim will store the project history for use in
   -- telescope
   datapath = vim.fn.stdpath("data"),
+
+  -- respect the autochdir setting by user
+  respect_autochdir = false,
 }
 
 ---@type ProjectOptions
@@ -57,7 +60,12 @@ M.setup = function(options)
     return glob.globtopattern(pattern)
   end, M.options.exclude_dirs)
 
-  vim.opt.autochdir = false -- implicitly unset autochdir
+  if not M.options.respect_autochdir then
+    vim.opt.autochdir = false -- implicitly unset autochdir
+  else
+    -- Unset the project dir changes done in global and tab scopes.
+    M.options.manual_mode = false
+  end
 
   require("project_nvim.utils.path").init()
   require("project_nvim.project").init()
